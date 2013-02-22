@@ -30,13 +30,15 @@ module NginxTestHelper
     TCPSocket.open(host, port)
   end
 
-  def get_in_socket(url, socket, wait_for=nil)
-    socket.print("GET #{url} HTTP/1.0\r\n\r\n")
+  def get_in_socket(url, socket, wait_for=nil, headers={"accept" => "text/html"})
+    request = "GET #{url} HTTP/1.0\r\n" + extra_headers(headers) + "\r\n\r\n"
+    socket.print(request)
     read_response_on_socket(socket, wait_for)
   end
 
-  def post_in_socket(url, body, socket, wait_for=nil)
-    socket.print("POST #{url} HTTP/1.0\r\nContent-Length: #{body.size}\r\n\r\n#{body}")
+  def post_in_socket(url, body, socket, wait_for=nil, headers={"accept" => "text/html"})
+    request = "POST #{url} HTTP/1.0\r\nContent-Length: #{body.size}\r\n\r\n#{body}" + extra_headers(headers) + "\r\n\r\n"
+    socket.print(request)
     read_response_on_socket(socket, wait_for)
   end
 
@@ -65,9 +67,7 @@ module NginxTestHelper
      (finish - start).to_i
   end
 
-  def headers
-    {'accept' => 'text/html'}
-  end
+
 
   def start_server(config)
     error_message = ""
@@ -113,6 +113,12 @@ private
       @test_passed
     else
       @passed
+    end
+  end
+
+  def extra_headers(hdrs={})
+    hdrs.each do |header, value|
+      header.split("-").map(&:capitalize).join("-") + ": " + value+"\r\n"
     end
   end
 end
