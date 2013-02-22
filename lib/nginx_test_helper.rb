@@ -31,13 +31,13 @@ module NginxTestHelper
   end
 
   def get_in_socket(url, socket, wait_for=nil, headers={"accept" => "text/html"})
-    request = "GET #{url} HTTP/1.0\r\n" + extra_headers(headers) + "\r\n\r\n"
+    request = "GET #{url} HTTP/1.0\r\n#{extra_headers(headers)}\r\n"
     socket.print(request)
     read_response_on_socket(socket, wait_for)
   end
 
   def post_in_socket(url, body, socket, wait_for=nil, headers={"accept" => "text/html"})
-    request = "POST #{url} HTTP/1.0\r\nContent-Length: #{body.size}\r\n\r\n#{body}" + extra_headers(headers) + "\r\n\r\n"
+    request = "POST #{url} HTTP/1.0\r\nContent-Length: #{body.size}\r\n\r\n#{body}#{extra_headers(headers)}\r\n"
     socket.print(request)
     read_response_on_socket(socket, wait_for)
   end
@@ -117,8 +117,10 @@ private
   end
 
   def extra_headers(hdrs={})
+    headers = ''
     hdrs.each do |header, value|
-      header.split("-").map(&:capitalize).join("-") + ": " + value+"\r\n"
+      headers += header.split("-").map(&:capitalize).join("-") + ": " + value+"\r\n"
     end
+    headers
   end
 end
